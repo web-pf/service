@@ -1,10 +1,14 @@
+from flask import Flask, request
+import random
+import string
 
-from flask import Flask
-from views import user
+from .api import user
 
 API_VERSION = 'v1'
 
 app = Flask(__name__)
+app.secret_key = ''.join(random.choices(
+    string.ascii_letters + string.digits, k=64))
 
 
 def createApiPrefix(append_path):

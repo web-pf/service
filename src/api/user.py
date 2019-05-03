@@ -3,32 +3,30 @@ import secrets
 from werkzeug.security import generate_password_hash, check_password_hash
 import json
 from .db import client
+from .auth import authenticate
+from .util.db import get_next_seq
 
 platform_db = client['web_pf']
 
 users_col = platform_db['users']
+counters_col = platform_db['counters']
 inv_code_col = platform_db['inv_codes']
 
 api = Blueprint('user', __name__)
 
 
 @api.route('/current', methods=['GET'])
-def user_current():
-    auth_token = request.cookies.get('auth_token')
-    email = session.get(auth_token)
-    if email:
+@authenticate()
+def user_current(uid):
+    info = users_col.find_one({
+        "uid": uid
+    })
 
-        info = users_col.find_one({
-            "email": email
-        })
-
-        return json.dumps({
-            "email": info['email']
-        })
-    else:
-        return make_response(json.dumps({
-            "error": True
-        }))
+    return json.dumps({
+        "uid": info['uid'],
+        "email": info['email'],
+        "nickname": info['nickname']
+    })
 
 
 @api.route('/status', methods=['GET'])
@@ -54,15 +52,25 @@ def user_status():
 def user_login():
     email = request.form['email']
     passwords = request.form['passwords']
-    passwords_hash = users_col.find_one({
+
+    user_info = users_col.find_one({
         "email": email
-    })['passwords']
+    })
+
+    passwords_hash = user_info['passwords']
+    nickname = user_info['nickname']
+    uid = user_info['uid']
+
     if check_password_hash(passwords_hash, passwords):
         response = make_response(json.dumps({
-            "error": False
+            "error": False,
+            "email": email,
+            "uid": uid,
+            "nickname": nickname,
+
         }))
         token = secrets.token_hex(64)
-        session[token] = email
+        session[token] = uid
         session.permanent = True
         response.set_cookie('auth_token', token)
         return response
@@ -71,6 +79,7 @@ def user_login():
 @api.route('/register', methods=['PUT'])
 def user_register():
     email = request.form['email']
+    nickname = request.form['nickname']
     passwords = request.form['passwords']
     invitation_code = request.form['invitationCode']
 
@@ -88,7 +97,9 @@ def user_register():
 
         if inv_code_result:
             users_col.insert_one({
+                "uid": get_next_seq(counters_col, 'userId'),
                 "email": email,
+                "nickname": nickname,
                 "used_inv_code": invitation_code,
                 "passwords": generate_password_hash(passwords)
             })

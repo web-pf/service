@@ -3,7 +3,7 @@ import random
 import string
 import datetime
 
-from api import user
+from api import user, website
 
 API_VERSION = 'v1'
 
@@ -14,12 +14,12 @@ app.secret_key = ''.join(random.choices(
 
 
 def create_api_prefix(append_path):
-    print(f"/api/{API_VERSION}{append_path}")
     return f"/api/{API_VERSION}{append_path}"
 
 
 def main():
     app.register_blueprint(user.api, url_prefix=create_api_prefix('/user'))
+    app.register_blueprint(website.api, url_prefix=create_api_prefix('/website'))
     app.debug = True
     app.run(host='0.0.0.0', port=4430)
 

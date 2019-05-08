@@ -32,11 +32,12 @@ def website_register_info(uid):
         "name": name,
         "description": description
     })
-    
+
     return json.dumps({
-      "error": False,
-      "websiteId": next_website_id
+        "error": False,
+        "websiteId": next_website_id
     })
+
 
 @api.route('', methods=['POST'])
 @authenticate()
@@ -45,14 +46,32 @@ def website_register_done(uid):
     website_id = content['websiteId']
     appId = shortuuid.uuid()
     website_col.update({
-      "websiteId": website_id
+        "websiteId": website_id
     }, {
-      "$set": {
-        "appId": appId
-      }
+        "$set": {
+            "appId": appId
+        }
     })
 
     return json.dumps({
-      "error": False,
-      "appId": appId
+        "error": False,
+        "appId": appId
     })
+
+
+@api.route('/list', methods=['GET'])
+@authenticate()
+def website_list(uid):
+    website_list = list(website_col.find({
+        "uid": uid
+    }, {
+        "_id": 0
+    }))
+
+    print(website_list)
+
+    return json.dumps({
+        "error": False,
+        "payload": website_list
+    })
+

@@ -19,21 +19,24 @@ def save_beacon(record):
     app_id = record['appId']
     beacon_name = record['name']
     beacon_record = record['record']
-    platform_db[f"app_{app_id}"].insertOne({
-      "name": beacon_name,
-      "record": beacon_record
+    timestamp = record['timestamp']
+    platform_db[f"app_{app_id}"].insert_one({
+        "timestamp": int(timestamp),
+        "name": beacon_name,
+        "record": beacon_record
     })
 
 
-@api.route('', methods=['POST'])
-def website_register_info(uid):
+@api.route('', methods=['PUT'])
+def upload_beacon():
     content = request.json
     validated_app_id = {}
 
-    for single_beacon_record in content:
+    for single_beacon_record_string in content:
+        single_beacon_record = json.loads(single_beacon_record_string)
         app_id = single_beacon_record['appId']
 
-        if validated_app_id[app_id]:
+        if app_id in validated_app_id:
             save_beacon(single_beacon_record)
 
         else:
@@ -44,3 +47,6 @@ def website_register_info(uid):
             if website_record:
                 validated_app_id[app_id] = True
                 save_beacon(single_beacon_record)
+    return json.dumps({
+        "error": False
+    })

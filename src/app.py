@@ -3,7 +3,7 @@ import random
 import string
 import datetime
 
-from api import user, website, beacon
+from api import user, website, beacon, perf
 
 API_VERSION = 'v1'
 
@@ -19,8 +19,9 @@ def create_api_prefix(append_path):
 
 def main():
     app.register_blueprint(user.api, url_prefix=create_api_prefix('/user'))
-    app.register_blueprint(user.api, url_prefix=create_api_prefix('/beacon'))
+    app.register_blueprint(beacon.api, url_prefix=create_api_prefix('/beacon'))
     app.register_blueprint(website.api, url_prefix=create_api_prefix('/website'))
+    app.register_blueprint(perf.api, url_prefix=create_api_prefix('/perf'))
     app.debug = True
     app.run(host='0.0.0.0', port=4430)
 

@@ -16,6 +16,7 @@ api = Blueprint('beacon', __name__)
 
 
 def save_beacon(record):
+    print(request.remote_addr)
     app_id = record['appId']
     beacon_name = record['name']
     beacon_record = record['record']
@@ -25,7 +26,7 @@ def save_beacon(record):
         "name": beacon_name,
         "record": beacon_record
     })
-
+    
 
 @api.route('', methods=['PUT'])
 def upload_beacon():
@@ -47,6 +48,11 @@ def upload_beacon():
             if website_record:
                 validated_app_id[app_id] = True
                 save_beacon(single_beacon_record)
+            else:
+                return make_response(json.dumps({
+                    "error": True,
+                    "msg": "app id not found"
+                }), 404)
     return json.dumps({
         "error": False
     })

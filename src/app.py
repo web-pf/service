@@ -16,6 +16,12 @@ app.secret_key = ''.join(random.choices(
 def create_api_prefix(append_path):
     return f"/api/{API_VERSION}{append_path}"
 
+def after_request(response):
+    response.headers['Access-Control-Allow-Origin'] = '*'
+    response.headers['Access-Control-Allow-Methods'] = 'PUT,GET,POST,DELETE'
+    response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Authorization'
+    return response
+
 
 def main():
     app.register_blueprint(user.api, url_prefix=create_api_prefix('/user'))
@@ -24,6 +30,7 @@ def main():
     app.register_blueprint(website.api, url_prefix=create_api_prefix('/website'))
     app.register_blueprint(perf.api, url_prefix=create_api_prefix('/perf'))
     app.debug = True
+    app.after_request(after_request)
     app.run(host='0.0.0.0', port=5000)
 
 

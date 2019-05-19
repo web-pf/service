@@ -19,8 +19,9 @@ COPY ./env/nginx/ssl /etc/nginx/ssl/
 # create nginx log directory and apply nginx configuration
 COPY ./env/nginx/site.conf /etc/nginx/sites-available/
 RUN ln -s ../sites-available/site.conf /etc/nginx/sites-enabled/site.conf
-RUN echo 'daemon off;' >> /etc/nginx/nginx.conf
+# RUN echo 'daemon off;' >> /etc/nginx/nginx.conf
 RUN mkdir /logs
+RUN mkdir -p /data/db
 
 
 # copy service code
@@ -30,5 +31,5 @@ COPY ./env/py/gunicorn.conf.py ./
 COPY ./src /web-perf-service/
 
 # Done
-EXPOSE 80 443 5000
-CMD gunicorn app:app -c gunicorn.conf.py && service mongodb start && service nginx start
+EXPOSE 80 443
+CMD mongod --fork --logpath /logs/mongo.log && service nginx start && python3 app.py

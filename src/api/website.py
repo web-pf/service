@@ -68,8 +68,6 @@ def website_list(uid):
         "_id": 0
     }))
 
-    print(website_list)
-
     return json.dumps({
         "error": False,
         "payload": website_list

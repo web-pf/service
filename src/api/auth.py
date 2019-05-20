@@ -15,7 +15,7 @@ def authenticate():
             else:
                 return make_response(json.dumps({
                     "error": True,
-                    "msg": "Your session has timed out."
+                    "msg": "Your token has timed out."
                 }), 403)
 
         return wrapper_func

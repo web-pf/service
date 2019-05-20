@@ -18,6 +18,8 @@ counters_col = platform_db['counters']
 api = Blueprint('error', __name__)
 
 def create_errors_view(errors: list):
+    if not len(errors):
+        return []
     res = [errors[0]]
     res[0]['timestamp'] = [res[0]['timestamp']]
     for error in errors[1:]:

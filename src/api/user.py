@@ -21,11 +21,11 @@ def user_current(uid):
     info = users_col.find_one({
         "uid": uid
     })
-
     return json.dumps({
         "uid": info['uid'],
         "email": info['email'],
-        "nickname": info['nickname']
+        "nickname": info['nickname'],
+        "privilegeCode": info['privilegeCode']
     })
 
 
@@ -60,6 +60,7 @@ def user_login():
     passwords_hash = user_info['passwords']
     nickname = user_info['nickname']
     uid = user_info['uid']
+    privilege_code = user_info['privilegeCode']
 
     if check_password_hash(passwords_hash, passwords):
         response = make_response(json.dumps({
@@ -67,6 +68,7 @@ def user_login():
             "email": email,
             "uid": uid,
             "nickname": nickname,
+            "privilegeCode": privilege_code
 
         }))
         token = secrets.token_hex(64)
@@ -101,7 +103,8 @@ def user_register():
                 "email": email,
                 "nickname": nickname,
                 "used_inv_code": invitation_code,
-                "passwords": generate_password_hash(passwords)
+                "passwords": generate_password_hash(passwords),
+                "privilegeCode": 1
             })
             return json.dumps({
                 "error": False,
